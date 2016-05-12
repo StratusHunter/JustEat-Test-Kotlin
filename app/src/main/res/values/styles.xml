@@ -6,6 +6,10 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Apply some default text formatting -->
+        <item name="android:textSize">@dimen/size_default</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
 </resources>

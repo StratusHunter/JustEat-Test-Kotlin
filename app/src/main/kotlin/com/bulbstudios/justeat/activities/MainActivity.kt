@@ -8,12 +8,15 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.Menu
+import android.view.View
 import com.bulbstudios.justeat.R
-import com.bulbstudios.justeat.dataclasses.Resturant
+import com.bulbstudios.justeat.adapters.RestaurantAdapter
+import com.bulbstudios.justeat.dataclasses.Restaurant
 import com.bulbstudios.justeat.services.JustEatRetrofit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
+import kotlinx.android.synthetic.main.activity_main.*
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
@@ -26,11 +29,14 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
     private val subscriptionList = CompositeSubscription()
+    private val recyclerAdapter = RestaurantAdapter(ArrayList<Restaurant>())
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        recyclerView.adapter = recyclerAdapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -57,33 +63,35 @@ class MainActivity : AppCompatActivity() {
         subscriptionList.clear()
     }
 
-    private fun setResturantArray(restaurants: List<Resturant>) {
+    private fun setRestaurantArray(restaurants: List<Restaurant>) {
 
+        recyclerView.visibility = if (restaurants.isEmpty()) View.GONE else View.VISIBLE
+        recyclerAdapter.restaurantList = restaurants
     }
 
     private fun clearSearch() {
 
-        setResturantArray(ArrayList<Resturant>())
+        setRestaurantArray(ArrayList<Restaurant>())
     }
 
     private fun searchWithPostcode(text: String) {
 
         subscriptionList.add(JustEatRetrofit.resturantService
-                                     .getResturantsWithPostcode(text)
+                                     .getResturantsWithPostcode(text.trimEnd())
                                      .map {
                                          json ->
 
                                          val resturantJson = json.getAsJsonArray(JustEatRetrofit.JSON_RESTAURANTS).toString()
-                                         val listType = object : TypeToken<List<Resturant>>() {}.type
+                                         val listType = object : TypeToken<List<Restaurant>>() {}.type
 
-                                         Gson().fromJson<List<Resturant>>(resturantJson, listType)
+                                         Gson().fromJson<List<Restaurant>>(resturantJson, listType)
                                      }
                                      .subscribeOn(Schedulers.newThread())
                                      .observeOn(AndroidSchedulers.mainThread())
                                      .subscribe({
                                                     restaurants ->
 
-                                                    setResturantArray(restaurants)
+                                                    setRestaurantArray(restaurants)
                                                 },
                                                 {
                                                     error ->
@@ -101,6 +109,7 @@ class MainActivity : AppCompatActivity() {
 
                                          postcode.toString()
                                      }
+                                     .observeOn(AndroidSchedulers.mainThread())
                                      .subscribe { text ->
 
                                          if (text.length == 0) clearSearch() else searchWithPostcode(text)
