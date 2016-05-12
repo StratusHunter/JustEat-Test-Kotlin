@@ -10,11 +10,14 @@ import android.util.Log
 import android.view.Menu
 import com.bulbstudios.justeat.R
 import com.bulbstudios.justeat.dataclasses.Resturant
-import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerView
-import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerViewAdapter
+import com.bulbstudios.justeat.services.JustEatRetrofit
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
-import kotlinx.android.synthetic.main.activity_main.*
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -23,7 +26,6 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
     private val subscriptionList = CompositeSubscription()
-    private val resturantDataSource = RxDataSource<Resturant>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -55,19 +57,39 @@ class MainActivity : AppCompatActivity() {
         subscriptionList.clear()
     }
 
+    private fun setResturantArray(restaurants: List<Resturant>) {
+
+    }
+
     private fun clearSearch() {
 
+        setResturantArray(ArrayList<Resturant>())
     }
 
     private fun searchWithPostcode(text: String) {
 
-    }
+        subscriptionList.add(JustEatRetrofit.resturantService
+                                     .getResturantsWithPostcode(text)
+                                     .map {
+                                         json ->
 
+                                         val resturantJson = json.getAsJsonArray(JustEatRetrofit.JSON_RESTAURANTS).toString()
+                                         val listType = object : TypeToken<List<Resturant>>() {}.type
 
-    private fun bindArrayToRecyclerView() {
+                                         Gson().fromJson<List<Resturant>>(resturantJson, listType)
+                                     }
+                                     .subscribeOn(Schedulers.newThread())
+                                     .observeOn(AndroidSchedulers.mainThread())
+                                     .subscribe({
+                                                    restaurants ->
 
-        RxRecyclerViewAdapter.dataChanges(resturantDataSource)
-        recyclerView.
+                                                    setResturantArray(restaurants)
+                                                },
+                                                {
+                                                    error ->
+
+                                                    Log.e(MainActivity::class.java.simpleName, "Error retrieving restaurants: $error")
+                                                }))
     }
 
     private fun subscribeSearchChange(searchView: SearchView) {
