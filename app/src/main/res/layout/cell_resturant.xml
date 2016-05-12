@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="restaurant" type="com.bulbstudios.justeat.dataclasses.Restaurant"/>
+    </data>
+
+    <RelativeLayout
+        android:paddingStart="@dimen/cell_padding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/textContainer"
+            android:paddingEnd="@dimen/cell_padding"
+            android:paddingTop="@dimen/cell_padding"
+            android:paddingBottom="@dimen/cell_padding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:textStyle="bold"
+                android:text="@{restaurant.name}"
+                android:id="@+id/nameText"
+                android:paddingBottom="@dimen/cell_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/addressText"
+                android:text="@{restaurant.address}"
+                android:layout_below="@+id/nameText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+        <View
+            android:layout_height="1dp"
+            android:layout_width="match_parent"
+            android:layout_below="@+id/textContainer"
+            android:background="@color/colorDivider"/>
+    </RelativeLayout>
+</layout>

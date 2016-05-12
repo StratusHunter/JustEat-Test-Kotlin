@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="size_title">50sp</dimen>
+    <dimen name="size_default">25sp</dimen>
+    <dimen name="cell_padding">20dp</dimen>
+</resources>
